@@ -8,6 +8,16 @@ const AuthPage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Get API URL from environment variables
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  // Create axios instance with credentials
+  const apiClient = axios.create({
+    baseURL: API_URL,
+    withCredentials: true,
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,6 +27,7 @@ const AuthPage = () => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setLoading(true);
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     const payload = isLogin 
@@ -24,9 +35,7 @@ const AuthPage = () => {
       : formData;
 
     try {
-      const response = await axios.post(endpoint, payload, {
-        withCredentials: true 
-      });
+      const response = await apiClient.post(endpoint, payload);
 
       if (response.data.success) {
         setMessage(isLogin ? "Login Successful! Redirecting..." : "Registration Successful! Please Login.");
@@ -38,13 +47,18 @@ const AuthPage = () => {
             navigate('/dashboard');
           }, 1500);
         } else {
+          // Reset form and switch to login
+          setFormData({ name: '', email: '', password: '' });
           setIsLogin(true);
         }
       } else {
         setError(response.data.message || 'Invalid email or password');
       }
     } catch (err) {
+      console.error('Auth error:', err);
       setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,7 +132,8 @@ const AuthPage = () => {
                     value={formData.name} 
                     onChange={handleChange} 
                     required 
-                    className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all"
+                    disabled={loading}
+                    className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all disabled:opacity-50"
                   />
                 </div>
               )}
@@ -131,7 +146,8 @@ const AuthPage = () => {
                   value={formData.email} 
                   onChange={handleChange} 
                   required 
-                  className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all"
+                  disabled={loading}
+                  className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all disabled:opacity-50"
                 />
               </div>
 
@@ -144,18 +160,20 @@ const AuthPage = () => {
                   value={formData.password} 
                   onChange={handleChange} 
                   required 
+                  disabled={loading}
                   minLength="6" 
-                  className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all tracking-widest"
+                  className="p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:bg-white/15 focus:border-[#d4f86d] focus:outline-none transition-all tracking-widest disabled:opacity-50"
                 />
               </div>
 
               {!isLogin && (
-                <div className="flex items-start items-center space-x-2 pt-1 pb-2">
+                <div className="flex items-start space-x-2 pt-1 pb-2">
                   <input 
                     type="checkbox" 
                     required 
                     id="terms"
-                    className="accent-[#d4f86d] rounded border-white/20 bg-transparent w-4 h-4 cursor-pointer"
+                    disabled={loading}
+                    className="accent-[#d4f86d] rounded border-white/20 bg-transparent w-4 h-4 cursor-pointer disabled:opacity-50"
                   />
                   <label htmlFor="terms" className="text-[11px] text-emerald-100/70 leading-none cursor-pointer selection:bg-transparent">
                     I agree <span className="underline hover:text-white transition-colors">Terms of Service</span> and <span className="underline hover:text-white transition-colors">Privacy Policy</span>
@@ -164,17 +182,25 @@ const AuthPage = () => {
               )}
 
               <button 
-                type="submit" 
-                className="w-full py-3 bg-gradient-to-r from-[#d4f86d] to-[#bde252] hover:shadow-lg hover:shadow-black/20 text-[#1f7060] rounded-xl font-bold text-sm transition-all duration-300 mt-4 active:scale-[0.99]"
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-[#d4f86d] to-[#bde252] hover:shadow-lg hover:shadow-black/20 text-[#1f7060] rounded-xl font-bold text-sm transition-all duration-300 mt-4 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLogin ? 'Sign In' : 'Sign Up'}
+                {loading ? (isLogin ? 'Signing In...' : 'Signing Up...') : (isLogin ? 'Sign In' : 'Sign Up')}
               </button>
             </form>
 
             <p className="text-center mt-6 text-xs text-emerald-100/60">
               {isLogin ? "New to the platform? " : "Already have an account? "}
               <span 
-                onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
+                onClick={() => { 
+                  if (!loading) {
+                    setIsLogin(!isLogin); 
+                    setError(''); 
+                    setMessage(''); 
+                    setFormData({ name: '', email: '', password: '' });
+                  }
+                }}
                 className="text-[#d4f86d] font-bold cursor-pointer hover:underline ml-1"
               >
                 {isLogin ? 'Join now' : 'Sign in'}
