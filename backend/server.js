@@ -65,12 +65,12 @@ app.post('/api/auth/login', async (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
-      maxAge: 24 * 60 * 60 * 1000
-    });
+  res.cookie('token', token, {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',  // ✅ Automatically true in production
+  maxAge: 24 * 60 * 60 * 1000
+});
 
     res.status(200).json({
       success: true,

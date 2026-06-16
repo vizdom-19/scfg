@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build --prefix studycompfor_gate",
+  "outputDirectory": "studycompfor_gate/build",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://scfg-backend.vercel.app/api/:path*"
+    }
+  ]
+}
