@@ -76,80 +76,82 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#f4fbf9] font-sans antialiased flex text-gray-800 overflow-hidden relative">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {sidebarOpen && (
-          <motion.div
-            className="fixed inset-0 z-40 bg-black/20 lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.aside
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200/90 p-6 overflow-y-auto shadow-2xl lg:hidden"
-            initial={{ x: -320 }}
-            animate={{ x: 0 }}
-            exit={{ x: -320 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 25 }}
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-xl bg-[#1c9c9c] flex items-center justify-center text-[#d4f86d] font-bold text-lg">@</div>
-                <span className="text-xl font-bold tracking-tight text-gray-900">SCfG</span>
+          <>
+            <motion.div
+              key="mobile-sidebar-overlay"
+              className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+            />
+            <motion.aside
+              key="mobile-sidebar-panel"
+              id="mobile-sidebar"
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-y-0 left-0 z-50 w-72 max-w-full bg-white border-r border-gray-200/90 p-6 overflow-y-auto shadow-2xl lg:hidden"
+              initial={{ x: -320 }}
+              animate={{ x: 0 }}
+              exit={{ x: -320 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 25 }}
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#1c9c9c] flex items-center justify-center text-[#d4f86d] font-bold text-lg">@</div>
+                  <span className="text-xl font-bold tracking-tight text-gray-900">SCfG</span>
+                </div>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1c9c9c]/30"
+                >
+                  Close
+                </button>
               </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
-              >
-                Close
-              </button>
-            </div>
-            <nav className="space-y-1.5">
-              <span className="text-[11px] font-bold tracking-wider text-gray-400 uppercase block mb-2">Workspace Utilities</span>
-              {SIDEBAR_ITEMS.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 text-left relative ${
-                      isActive ? 'text-[#1c9c9c] font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        className="absolute inset-0 bg-[#1c9c9c]/10 border-l-4 border-[#1c9c9c] rounded-xl"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <span className="text-lg relative z-10">{item.icon}</span>
-                    <span className="relative z-10 truncate">{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-            <div className="pt-4 border-t border-gray-100 mt-6">
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setSidebarOpen(false);
-                }}
-                className="w-full flex items-center space-x-3 px-4 py-3 text-red-500 font-medium text-sm hover:bg-red-50 rounded-xl transition-colors"
-              >
-                <span>🚪</span>
-                <span>Exit Workspace</span>
-              </button>
-            </div>
-          </motion.aside>
+              <nav className="space-y-1.5">
+                <span className="text-[11px] font-bold tracking-wider text-gray-400 uppercase block mb-2">Workspace Utilities</span>
+                {SIDEBAR_ITEMS.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 text-left relative ${
+                        isActive ? 'text-[#1c9c9c] font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeIndicator"
+                          className="absolute inset-0 bg-[#1c9c9c]/10 border-l-4 border-[#1c9c9c] rounded-xl"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      <span className="text-lg relative z-10">{item.icon}</span>
+                      <span className="relative z-10 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+              <div className="pt-4 border-t border-gray-100 mt-6">
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-red-500 font-medium text-sm hover:bg-red-50 rounded-xl transition-colors"
+                >
+                  <span>🚪</span>
+                  <span>Exit Workspace</span>
+                </button>
+              </div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
 
